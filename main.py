@@ -61,6 +61,7 @@ def GameText(Player = Player()):
 
     if(GameState == 1):
         ShowNames()
+        print("\n")
         print("Premio por acertar: R$" + str(Awards[QuestionCount][0]) + ",00")
         print("Premio por sair: R$" + str(Awards[QuestionCount][1]) + ",00")
         print("Premio por errar: R$" + str(Awards[QuestionCount][2]) + ",00")
