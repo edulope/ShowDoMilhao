@@ -1,4 +1,3 @@
-import curses
 import os
 from termcolor import colored
 from player import Player
@@ -15,9 +14,26 @@ from question import Question
 # 6 - recebe pergunta
 # 7 - Um jogador venceu
 
-
+#definindo o escopo de cores e premios
 Colors = [["1 - vermelho","red",False],["2 - azul","blue",False],["3 - amarelo", "yellow",False],["4 - verde", "green",False],["5 - cinza", "grey",False],["6 - branco", "white",False],["7 - ciano", "cyan",False],["8 - magenta", "magenta",False]]
 Awards = [[1000, 0, 0],[2000, 1000, 500],[3000, 2000, 1000],[4000, 3000, 1500],[5000, 4000, 2000],[10000, 5000, 2500],[20000, 10000, 5000],[30000, 20000, 10000],[40000, 30000, 15000],[50000, 40000, 20000],[100000, 50000, 25000],[200000, 100000, 50000],[300000, 200000, 100000],[400000, 300000, 150000],[500000, 400000, 200000],[1000000, 500000, 0]]
+
+#a funcao clear é a responsavel pela limpeza do terminal
+clear = lambda: os.system('cls')
+
+#array com players
+Players = []
+#variavel de controle do jogo
+Exit = False
+#variavel de estado do jogo
+GameState = 0
+#variavel de questões em sequencia daquele jogador(vai ser utilizada no awards)
+QuestionCount = 0
+#variavel que define a vez dos jogadores
+turn = 0
+#questão atual e alternativas
+Q = None
+Alts = None
 
 
 
@@ -32,7 +48,7 @@ def ShowNames():
             if (i == turn): print(">>>", end='')
             print(colored(Players[i].GetName(), Colors[Players[i].GetColor()][1]), "RS$" + str(Players[i].GetPoints()) + ",00")
 
-
+#Essa função é chamada a cada loop do jogo, ela é a responsavel por trazer a interface adequada para o estado atual
 def GameText(Player = Player()):
     print("bem vindo ao Show do milhão")
     print("Utilize um teclado numérico para selecionar as alternativas, use P para entrar no menu de opções e Q para sair, e bom jogo :)")
@@ -106,30 +122,12 @@ def RemovePlayer(id):
     if(len(Players) <= turn):
         turn = 0
 
-clear = lambda: os.system('cls')
 
-Players = []
-
-Exit = False
-
-GameState = 0
-QuestionCount = 0
-turn = 0
-Q = None
-Alts = None
-
+#loop do jogo
 while (not Exit):
     clear()
     GameText()
-    #if(GameState == 1):
-    #    timeout = 1
-    #    t = Timer(timeout, print, ["Tempo esgotado"])
-    #    Input = -1
-    #    t.start()
-    #    prompt = "você tem %d segundos para responder\n" % timeout
-    #    Input = input(prompt)
-    #    if(t.cancel()): print("aqui")
-
+    #estados 4 e 5 não usam input, ficam com a tela congelada e depois voltam para 1 ou 7
     if(GameState != 4 and GameState != 5):
         Input = input()
         if(Input.isnumeric() and int(Input) > 0 and int(Input) < 9):
@@ -149,6 +147,7 @@ while (not Exit):
                     RemovePlayer(int(Input)-1)
                 GameState = 2
 
+        #tecla de pause
         elif(Input == "P"):
             if(GameState == 1):
                 GameState = 2
@@ -158,6 +157,7 @@ while (not Exit):
                     time.sleep(1)
                 else: GameState = 1
 
+        #tecla para adicionar player durante pause
         elif(Input == "A"):
             if(GameState == 2):
                 if(len(Players) < 8):
@@ -165,13 +165,16 @@ while (not Exit):
                 else:
                     print("Numero Máximo de jogadores atingido")
 
+        #tecla para remover players durante o pause
         elif (Input == "R"):
             if (GameState == 2 and len(Players)>0):
                 GameState = 3
 
+        #tecla para sair do jogo
         elif(Input == "Q"):
             Exit = True
 
+        #tecla para desistir da aposta, também pode é utilizada para confirmar novo jogo e remoção de um player(a remoção está em outro trecho)
         elif(Input == "S"):
             if(GameState == 1):
                 Players[turn].SetPoints(Players[turn].GetPoints() + Awards[QuestionCount][1])
@@ -185,10 +188,11 @@ while (not Exit):
                 Alts = Q.GetAlternativas()
                 GameState = 1
 
-
+        #tecla para continuar aposta
         elif(Input == "C"):
             if(GameState == 1):
                 GameState = 6
+
     else:
         time.sleep(2)
         if(GameState == 5):
